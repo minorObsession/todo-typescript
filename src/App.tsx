@@ -52,19 +52,13 @@ function App() {
   ]);
 
   useEffect(() => {
-    console.log(query);
     setFilteredItems(items.filter((item) => item.title.includes(query)));
   }, [query]);
-  // const handleSearchList = () => {
-  //   if (!query) return;
 
-  //   console.log(query);
-  //   console.log(items.filter((item) => item.title.includes(query)));
-  // };
-
-  const itemsSortedByStatus = items.sort(
-    (a, b) => +a.isFinished - +b.isFinished
-  );
+  const itemsSortedByStatus =
+    filteredItems.length > 0
+      ? filteredItems.sort((a, b) => +a.isFinished - +b.isFinished)
+      : items.sort((a, b) => +a.isFinished - +b.isFinished);
 
   const threeFastestItems = items
     .filter((item) => typeof item.completedInMs === "number")

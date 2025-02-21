@@ -1,4 +1,3 @@
-import Input from "./Input";
 import { Item } from "./types.ts";
 
 type ChecklistItemProps = {
