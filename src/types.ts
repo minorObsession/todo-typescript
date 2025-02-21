@@ -4,6 +4,8 @@ export type Item = {
   isFinished: boolean;
   createdAt: number;
   completedAt?: number;
+  completedInMs?: number;
+  completedIn?: string;
 };
 
-export type Items = [];
+export type Items = Item[];

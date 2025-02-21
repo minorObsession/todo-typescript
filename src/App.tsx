@@ -1,18 +1,22 @@
-// import { useState } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ChecklistItem from "./Checklistitem.tsx";
 import Input from "./Input.tsx";
-import { Item } from "./types.ts";
+import { Item, Items } from "./types.ts";
+import { flexibleMillisecondsConverter } from "./flexibleMillisecondsConverter.ts";
+import { useInputChangeDebounce } from "./useInputChangeDebounce(useState+useEffect).tsx";
 
 function App() {
   const [isAdding, setIsAdding] = useState(false);
   const [newItemTitle, setNewItemTitle] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [items, setItems] = useState([
+  const [filteredItems, setFilteredItems] = useState<Items | []>([]);
+  const query = useInputChangeDebounce(searchQuery);
+
+  const [items, setItems] = useState<Items>([
     {
       ID: Math.floor(Math.random() * 535353),
       title: "pack bags",
-      isFinished: true,
+      isFinished: false,
       createdAt: 1740106103073,
     },
     {
@@ -47,9 +51,28 @@ function App() {
     },
   ]);
 
+  useEffect(() => {
+    console.log(query);
+    setFilteredItems(items.filter((item) => item.title.includes(query)));
+  }, [query]);
+  // const handleSearchList = () => {
+  //   if (!query) return;
+
+  //   console.log(query);
+  //   console.log(items.filter((item) => item.title.includes(query)));
+  // };
+
   const itemsSortedByStatus = items.sort(
     (a, b) => +a.isFinished - +b.isFinished
   );
+
+  const threeFastestItems = items
+    .filter((item) => typeof item.completedInMs === "number")
+    .filter((item) => item.isFinished)
+    .sort(
+      (a, b) => (a.completedInMs ?? Infinity) - (b.completedInMs ?? Infinity)
+    )
+    .slice(0, 3);
 
   const percentageOfCompletedItems = Math.ceil(
     (items.filter((item) => item.isFinished).length / items.length) * 100
@@ -62,10 +85,7 @@ function App() {
 
     const completedAt = Date.now();
 
-    // ! I WAS HERE
-    const completedIn =
-      new Date(completedAt) - new Date(itemInQuestion.createdAt);
-
+    const completedInMs = completedAt - itemInQuestion.createdAt;
     setItems((prevItems) =>
       prevItems.map((item) =>
         item.ID === itemInQuestion.ID
@@ -73,12 +93,15 @@ function App() {
               ...item,
               isFinished: !item.isFinished,
               completedAt: completedAt,
-              completedIn: completedIn,
+              completedInMs: completedInMs,
+              completedIn: flexibleMillisecondsConverter(completedInMs),
             }
           : item
       )
     );
   };
+
+  const newItemInputRef = useRef<HTMLInputElement | null>(null);
 
   const addNewItem = () => {
     // ! create item - conform to Item type
@@ -106,10 +129,10 @@ function App() {
     );
   };
 
-  // * SYNC WITH CHANGE OF newItemTitle
-  useEffect(() => {}, [newItemTitle]);
-
-  // ! add/remove items fns
+  useEffect(() => {
+    if (!isAdding) return;
+    newItemInputRef.current?.focus();
+  }, [isAdding]);
 
   return (
     // ! container
@@ -121,7 +144,12 @@ function App() {
         {/* // ! search items */}
         <div className="flex items-center justify-around mb-3">
           <h2 className="">Search to do list</h2>
-          <Input purpose="search" addNewItem={addNewItem} />
+          <Input
+            purpose="search"
+            addNewItem={addNewItem}
+            setSearchQuery={setSearchQuery}
+            // onChange={handleSearchList}
+          />
         </div>
 
         {/* // ! add new item button */}
@@ -135,12 +163,15 @@ function App() {
         {/* // ! items list  */}
         <ul className="flex flex-col gap-3.5 p-10 w-full overflow-y-auto mx-auto ">
           {isAdding && (
-            <Input purpose="newItem" setNewItemTitle={setNewItemTitle} />
+            <Input
+              purpose="newItem"
+              setNewItemTitle={setNewItemTitle}
+              ref={newItemInputRef}
+            />
           )}
           {itemsSortedByStatus.map((item) => (
             <ChecklistItem
-              // setClickedItem={}
-              onChange={() => console.log("Checkbox clicked!")} // Replace with real handler
+              onChange={() => {}}
               key={item.ID}
               item={item}
               isFinished={item.isFinished}
@@ -164,10 +195,22 @@ function App() {
         </div>
 
         {/* // ! 3 fastest items  */}
-        <div className="mt-5">
-          <p>Fastest completed items:</p>
-          {/* // * 3 fastest */}
-        </div>
+        {threeFastestItems.length > 0 && (
+          <div className="flex flex-col gap-1.5 mt-5">
+            <h2 className="mb-3">Fastest completed items:</h2>
+            {threeFastestItems.map((item, i) => (
+              <div
+                key={item.ID}
+                className="flex items-center justify-center gap-2"
+              >
+                <h3>
+                  {i + 1}: {item.title} →{" "}
+                  {flexibleMillisecondsConverter(item.completedInMs ?? 0)}
+                </h3>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* // ! bottom stats div */}
         <div className="self-start mt-auto ">
