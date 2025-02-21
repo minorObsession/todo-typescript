@@ -5,6 +5,7 @@ type InputProps = React.ComponentPropsWithRef<"input"> & {
   setNewItemTitle?: React.Dispatch<React.SetStateAction<string>>;
   setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
   addNewItem?: () => void;
+  setIsAdding?: React.Dispatch<React.SetStateAction<boolean>>;
   ref?: React.RefObject<unknown>;
 };
 
@@ -13,6 +14,7 @@ const Input = ({
   setNewItemTitle,
   setSearchQuery,
   addNewItem,
+  setIsAdding,
   ref,
   ...rest
 }: InputProps) => {
@@ -21,9 +23,12 @@ const Input = ({
     if (setSearchQuery) setSearchQuery(e.target.value);
   };
 
-  // ! ideas:
-  // add x --> cancel btn for adding new item
-  useKeyPress("enter", addNewItem);
+  if (addNewItem) {
+    useKeyPress("enter", addNewItem);
+    if (setIsAdding) useKeyPress("escape", () => setIsAdding(false));
+  }
+
+  // useKeyPress('escape', ()=> )
 
   return (
     <input

@@ -4,8 +4,8 @@ type ChecklistItemProps = {
   item: Item;
   newItemTitle: string;
   isFinished: boolean;
-  toggleItemStatus: (clickedID: number) => void;
-  removeItem: (clickedID: number) => void;
+  toggleItemStatus: (clickedID: string) => void;
+  removeItem: (clickedID: string) => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 

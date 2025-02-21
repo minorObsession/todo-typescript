@@ -6,59 +6,57 @@ import { flexibleMillisecondsConverter } from "./flexibleMillisecondsConverter.t
 import { useInputChangeDebounce } from "./useInputChangeDebounce(useState+useEffect).tsx";
 
 function App() {
-  const [isAdding, setIsAdding] = useState(false);
-  const [newItemTitle, setNewItemTitle] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredItems, setFilteredItems] = useState<Items | []>([]);
-  const query = useInputChangeDebounce(searchQuery);
-
   const [items, setItems] = useState<Items>([
     {
-      ID: Math.floor(Math.random() * 535353),
+      ID: crypto.randomUUID(),
       title: "pack bags",
       isFinished: false,
-      createdAt: 1740106103073,
+      createdAt: 1740156103073,
     },
     {
-      ID: Math.floor(Math.random() * 535353),
+      ID: crypto.randomUUID(),
       title: "feed dog",
       isFinished: false,
-      createdAt: 1740106117946,
+      createdAt: 1740146117946,
     },
     {
-      ID: Math.floor(Math.random() * 535353),
+      ID: crypto.randomUUID(),
       title: "feed cat",
       isFinished: false,
-      createdAt: 1740106145965,
+      createdAt: 1740136145965,
     },
     {
-      ID: Math.floor(Math.random() * 535353),
+      ID: crypto.randomUUID(),
       title: "feed turtle",
       isFinished: false,
-      createdAt: 1740106199885,
+      createdAt: 1740186199885,
     },
     {
-      ID: Math.floor(Math.random() * 535353),
+      ID: crypto.randomUUID(),
       title: "do homework",
       isFinished: false,
-      createdAt: 1740106155446,
+      createdAt: 1740196155446,
     },
     {
-      ID: Math.floor(Math.random() * 535353),
+      ID: crypto.randomUUID(),
       title: "park cars",
       isFinished: false,
       createdAt: 1740106177445,
     },
   ]);
+  const [isAdding, setIsAdding] = useState(false);
+  const [newItemTitle, setNewItemTitle] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredItems, setFilteredItems] = useState<Items>([]);
+  const query = useInputChangeDebounce(searchQuery);
 
-  useEffect(() => {
-    setFilteredItems(items.filter((item) => item.title.includes(query)));
-  }, [query]);
+  const newItemInputRef = useRef<HTMLInputElement | null>(null);
 
   const itemsSortedByStatus =
     filteredItems.length > 0
       ? filteredItems.sort((a, b) => +a.isFinished - +b.isFinished)
       : items.sort((a, b) => +a.isFinished - +b.isFinished);
+  // console.log("itemsSortedByStatus", itemsSortedByStatus);
 
   const threeFastestItems = items
     .filter((item) => typeof item.completedInMs === "number")
@@ -72,8 +70,21 @@ function App() {
     (items.filter((item) => item.isFinished).length / items.length) * 100
   );
 
-  const toggleItemStatus = (clickedID: number) => {
-    const itemInQuestion = items.find((item) => +item.ID === clickedID);
+  useEffect(() => {
+    if (!isAdding) return;
+    newItemInputRef.current?.focus();
+  }, [isAdding]);
+
+  useEffect(() => {
+    if (!query || query.length === 0) {
+      setFilteredItems([]);
+    } else {
+      setFilteredItems(items.filter((item) => item.title.includes(query)));
+    }
+  }, [query, items]);
+
+  const toggleItemStatus = (clickedID: string) => {
+    const itemInQuestion = items.find((item) => item.ID === clickedID);
 
     if (!itemInQuestion) return;
 
@@ -95,26 +106,27 @@ function App() {
     );
   };
 
-  const newItemInputRef = useRef<HTMLInputElement | null>(null);
-
   const addNewItem = () => {
     // ! create item - conform to Item type
     const newItem: Item = {
-      ID: Math.floor(Math.random() * 45654),
+      ID: crypto.randomUUID(),
       createdAt: Date.now(),
       title: newItemTitle,
       isFinished: false,
     };
 
-    // ! IDEA (optional):
-    // ENSURE THIS ITEM DOESN'T ALREADY EXIST
+    // const isDuplicate = items.find((item) => item.title === newItem.title);
+    // if (isDuplicate) {
+    //   setIsAdding(false);
+    //   return alert("this item already exists!");
+    // }
 
-    setItems((prevItems) => [...prevItems, newItem]);
+    setItems((prevItems) => [newItem, ...prevItems]);
     setIsAdding(false);
   };
 
-  const removeItem = (clickedID: number) => {
-    const itemInQuestion = items.find((item) => +item.ID === clickedID);
+  const removeItem = (clickedID: string) => {
+    const itemInQuestion = items.find((item) => item.ID === clickedID);
 
     if (!itemInQuestion) return;
 
@@ -122,11 +134,6 @@ function App() {
       prevItems.filter((item) => item.ID !== itemInQuestion.ID)
     );
   };
-
-  useEffect(() => {
-    if (!isAdding) return;
-    newItemInputRef.current?.focus();
-  }, [isAdding]);
 
   return (
     // ! container
@@ -142,14 +149,14 @@ function App() {
             purpose="search"
             addNewItem={addNewItem}
             setSearchQuery={setSearchQuery}
-            // onChange={handleSearchList}
+            setIsAdding={setIsAdding}
           />
         </div>
 
         {/* // ! add new item button */}
         <button
           onClick={() => setIsAdding(true)}
-          className="mb-5 self-center w-[70%] px-2 py-1 transition-all duration-300 rounded-sm cursor-pointer hover:scale-105 border-1 border-amber-500 "
+          className=" self-center w-[70%] px-2 py-1 transition-all duration-300 rounded-sm cursor-pointer hover:scale-105 border-1 border-amber-500 "
         >
           Add new item
         </button>
@@ -187,6 +194,9 @@ function App() {
           <progress id="file" max="100" value={percentageOfCompletedItems} />
           <p className="ml-3 text-center">{percentageOfCompletedItems}%</p>
         </div>
+        {percentageOfCompletedItems === 100 && (
+          <p className="mt-3">Completed all tasks! 🥳 🥳 🥳</p>
+        )}
 
         {/* // ! 3 fastest items  */}
         {threeFastestItems.length > 0 && (
