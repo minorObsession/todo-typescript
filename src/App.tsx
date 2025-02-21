@@ -60,10 +60,21 @@ function App() {
 
     if (!itemInQuestion) return;
 
+    const completedAt = Date.now();
+
+    // ! I WAS HERE
+    const completedIn =
+      new Date(completedAt) - new Date(itemInQuestion.createdAt);
+
     setItems((prevItems) =>
       prevItems.map((item) =>
         item.ID === itemInQuestion.ID
-          ? { ...item, isFinished: !item.isFinished, completedAt: Date.now() }
+          ? {
+              ...item,
+              isFinished: !item.isFinished,
+              completedAt: completedAt,
+              completedIn: completedIn,
+            }
           : item
       )
     );
@@ -104,7 +115,7 @@ function App() {
     // ! container
     <div className="flex items-center justify-center w-screen h-screen p-20 overflow-hidden">
       {/* // ! left  */}
-      <article className="flex flex-col w-full h-full p-10 overflow-hidden text-center bg-amber-200">
+      <article className="flex flex-col w-full h-full p-10 overflow-hidden text-center rounded-md bg-amber-200">
         <h1 className="mb-5">To do list</h1>
 
         {/* // ! search items */}
@@ -142,20 +153,21 @@ function App() {
       </article>
 
       {/* // ! right   */}
-      <article className="flex flex-col w-full h-full p-10 overflow-hidden text-center bg-amber-700">
+      <article className="flex flex-col w-full h-full p-10 overflow-hidden text-center rounded-md bg-amber-700">
         <h1 className="mb-5">Statistics</h1>
 
         {/* // ! progress */}
         <h2 className="mb-3">% of completed to-do items:</h2>
         <div className="flex items-center justify-center">
           <progress id="file" max="100" value={percentageOfCompletedItems} />
-          <span className="ml-3 text-center">
-            {percentageOfCompletedItems}%
-          </span>
+          <p className="ml-3 text-center">{percentageOfCompletedItems}%</p>
         </div>
 
         {/* // ! 3 fastest items  */}
-        <div></div>
+        <div className="mt-5">
+          <p>Fastest completed items:</p>
+          {/* // * 3 fastest */}
+        </div>
 
         {/* // ! bottom stats div */}
         <div className="self-start mt-auto ">

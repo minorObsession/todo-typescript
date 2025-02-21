@@ -24,7 +24,7 @@ const Input = ({
   useKeyPress("enter", addNewItem);
   return (
     <input
-      className={`w-fit rounded-sm border-1 border-amber-500 bg-amber-100 px-1.5 `}
+      className={`${purpose === "search" ? "w-fit" : "w-full"} rounded-sm border-1 border-amber-500 bg-amber-100 px-1.5 `}
       onChange={handleChange}
       type="text"
       {...rest}
