@@ -2,7 +2,8 @@ export type Item = {
   ID: number;
   title: string;
   isFinished: boolean;
-  timestamp: number;
+  createdAt: number;
+  completedAt?: number;
 };
 
 export type Items = [];
