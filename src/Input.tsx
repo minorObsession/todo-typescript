@@ -23,7 +23,7 @@ const Input = ({
     if (setSearchQuery) setSearchQuery(e.target.value);
   };
 
-  if (addNewItem) {
+  if (addNewItem && setIsAdding) {
     useKeyPress("enter", addNewItem);
     if (setIsAdding) useKeyPress("escape", () => setIsAdding(false));
   }
