@@ -7,6 +7,7 @@ type InputProps = React.ComponentPropsWithRef<"input"> & {
   addNewItem?: () => void;
   setIsAdding?: React.Dispatch<React.SetStateAction<boolean>>;
   ref?: React.RefObject<unknown>;
+  focusSearchField?: () => void;
 };
 
 const Input = ({
@@ -15,6 +16,7 @@ const Input = ({
   setSearchQuery,
   addNewItem,
   setIsAdding,
+  focusSearchField,
   ref,
   ...rest
 }: InputProps) => {
@@ -22,17 +24,21 @@ const Input = ({
     if (setNewItemTitle) setNewItemTitle(e.target.value);
     if (setSearchQuery) setSearchQuery(e.target.value);
   };
-
   if (addNewItem && setIsAdding) {
     useKeyPress("enter", addNewItem);
     if (setIsAdding) useKeyPress("escape", () => setIsAdding(false));
   }
 
-  // useKeyPress('escape', ()=> )
+  if (focusSearchField && setSearchQuery) {
+    useKeyPress("KeyS", (e) => {
+      e.preventDefault();
+      focusSearchField();
+    });
+  }
 
   return (
     <input
-      className={`${purpose === "search" ? "w-fit" : "w-full"} rounded-sm border-1 border-amber-500 bg-amber-100 px-1.5 `}
+      className={`${purpose === "search" ? "w-fit" : "w-full mb-4"} rounded-xl border-1 border-amber-500 bg-amber-100 px-1.5  `}
       onChange={handleChange}
       type="text"
       ref={ref}

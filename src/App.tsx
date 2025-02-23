@@ -4,6 +4,7 @@ import Input from "./Input.tsx";
 import { Item, Items } from "./types.ts";
 import { flexibleMillisecondsConverter } from "./flexibleMillisecondsConverter.ts";
 import { useInputChangeDebounce } from "./useInputChangeDebounce(useState+useEffect).tsx";
+import { useKeyPress } from "./useKeyPress.ts";
 
 function App() {
   const [items, setItems] = useState<Items>([
@@ -141,6 +142,7 @@ function App() {
   const query = useInputChangeDebounce(searchQuery);
 
   const newItemInputRef = useRef<HTMLInputElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -231,42 +233,47 @@ function App() {
     );
   };
 
+  const focusSearchField = () => {
+    searchInputRef.current?.focus();
+  };
+
   const prevPage = () => {
-    if (currentPage >= 1) setCurrentPage((prevState) => --prevState);
+    if (currentPage > 1) setCurrentPage((prevState) => --prevState);
   };
   const nextPage = () => {
-    if (currentPage <= totalNumPages)
-      setCurrentPage((prevState) => ++prevState);
+    if (currentPage < totalNumPages) setCurrentPage((prevState) => ++prevState);
   };
 
   return (
     // ! container
     <div className="flex items-center justify-center w-screen h-screen p-20 overflow-hidden">
       {/* // ! left  */}
-      <article className="flex flex-col w-full h-full p-10 overflow-hidden text-center rounded-md bg-amber-200">
-        <h1 className="mb-5">To do list</h1>
+      <article className="flex flex-col w-full h-full p-10 overflow-hidden text-center rounded-md bg-gradient-to-br from-amber-200 via-amber-300 to-amber-400">
+        <h1 className="mb-5 text-3xl tracking-wide">To do list</h1>
 
         {/* // ! search items */}
-        <div className="flex items-center justify-around mb-3">
+        <div className="flex items-center justify-around mb-5">
           <h2 className="">Search to do list</h2>
           <Input
             purpose="search"
             addNewItem={addNewItem}
             setSearchQuery={setSearchQuery}
             setIsAdding={setIsAdding}
+            ref={searchInputRef}
+            focusSearchField={focusSearchField}
           />
         </div>
 
         {/* // ! add new item button */}
         <button
           onClick={() => setIsAdding(true)}
-          className=" self-center w-[70%] px-2 py-1 transition-all duration-300 rounded-sm cursor-pointer hover:scale-105 border-1 border-amber-500 "
+          className=" self-center w-[60%] px-3 py-2 transition-all duration-300 rounded-2xl cursor-pointer hover:scale-105 border-1 border-amber-500 bg-amber-500 text-lg tracking-wide"
         >
           Add new item
         </button>
 
         {/* // ! items list  */}
-        <ul className="flex flex-col gap-3.5 p-10 w-full overflow-y-auto mx-auto ">
+        <ul className="flex flex-col gap-3.5 p-10 w-full flex-grow overflow-y-auto mx-auto ">
           {isAdding && (
             <Input
               purpose="newItem"
@@ -293,7 +300,7 @@ function App() {
         </ul>
 
         {/* // ! pagination */}
-        <div className="flex items-center justify-center gap-2 mt-auto justify-self-end ">
+        <div className="flex gap-3 px-3 py-2 mx-auto my-auto ml-auto bg-amber-500 w-fit rounded-2xl">
           <button className="cursor-pointer" onClick={prevPage}>
             ←
           </button>
@@ -307,8 +314,8 @@ function App() {
       </article>
 
       {/* // ! right   */}
-      <article className="flex flex-col w-full h-full p-10 overflow-hidden text-center rounded-md bg-amber-700">
-        <h1 className="mb-5">Statistics</h1>
+      <article className="flex flex-col w-full h-full p-10 overflow-hidden text-center rounded-md bg-gradient-to-bl from-amber-500 via-amber-600 to-amber-700">
+        <h1 className="text-3xl tracking-wide mb-36 ">Analytics</h1>
 
         {/* // ! progress */}
         <h2 className="mb-3">% of completed to-do items:</h2>
